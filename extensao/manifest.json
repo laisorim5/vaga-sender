@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Vaga Sender",
+  "version": "1.0",
+  "description": "Envia vagas para grupos do WhatsApp",
+  "permissions": [
+    "contextMenus",
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": " "
+  }
+}
