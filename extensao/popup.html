@@ -76,7 +76,23 @@
   <label>🔗 Link</label>
   <input type="text" id="link" />
 
-  <label>🖼️ Imagem</label>
+  <label>🖼️ Imagem (cole com Ctrl+V)</label>
+  <div id="imagem-area" style="
+  width: 100%;
+  box-sizing: border-box;
+  border: 2px dashed #ddd;
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 10px;
+  text-align: center;
+  font-size: 12px;
+  color: #aaa;
+  cursor: pointer;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  ">Cole uma imagem aqui (Ctrl+V)</div>
   <img id="preview" class="imagem-preview" />
 
   <label>Enviar para:</label>
@@ -108,6 +124,24 @@
         preview.src = vaga.imagemUrl;
         preview.style.display = "block";
       }
+    });
+
+    // Captura Ctrl+V com imagem
+    document.addEventListener("paste", (e) => {
+    const items = e.clipboardData.items;
+    for (const item of items) {
+        if (item.type.startsWith("image/")) {
+        const blob = item.getAsFile();
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const preview = document.getElementById("preview");
+            preview.src = ev.target.result; // base64
+            preview.style.display = "block";
+            document.getElementById("imagem-area").innerText = "✅ Imagem colada!";
+        };
+        reader.readAsDataURL(blob);
+        }
+    }
     });
 
     function enviar(destino) {
