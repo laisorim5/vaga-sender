@@ -92,7 +92,12 @@
     // Quando o popup abre, carrega os dados capturados pelo background.js
     chrome.storage.local.get("vagaPendente", (result) => {
       const vaga = result.vagaPendente;
-      if (!vaga) return;
+      if (!vaga) {
+        // Popup aberto sem seleção — campos ficam vazios e editáveis
+        document.getElementById("link").value = "";
+        document.getElementById("status").innerText = "✏️ Preencha os campos manualmente";
+        return;
+    }
 
       document.getElementById("texto").value = vaga.texto || "";
       document.getElementById("link").value = vaga.link || "";
