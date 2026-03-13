@@ -1,4 +1,3 @@
-// Quando a extensão é instalada, cria os menus do botão direito
 chrome.runtime.onInstalled.addListener(() => {
   const destinos = [
     { id: "estagio", title: "📢 Enviar para Estágio" },
@@ -10,16 +9,14 @@ chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
       id: destino.id,
       title: destino.title,
-      contexts: ["selection"] // só aparece quando tem texto selecionado
+      contexts: ["selection"]
     });
   });
 });
 
-// Quando o usuário clica em uma opção do menu
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   const destino = info.menuItemId;
 
-  // Executa um script dentro da página pra capturar texto e imagem
   chrome.scripting.executeScript({
     target: { tabId: tab.id },
     func: capturarDadosDaPagina,
@@ -27,20 +24,40 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     const dados = results[0].result;
     dados.destino = destino;
 
-    // Salva no storage pra o popup conseguir ler
-    chrome.storage.local.set({ vagaPendente: dados });
-
-    // Abre o popup
-    chrome.action.openPopup();
+    // Salva no storage e abre o popup via notificação na aba
+    chrome.storage.local.set({ vagaPendente: dados }, () => {
+      // Injeta um aviso visual na página pra você clicar no ícone
+      chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: () => {
+          const aviso = document.createElement("div");
+          aviso.id = "vaga-sender-aviso";
+          aviso.innerText = "✅ Vaga capturada! Clique no ícone da extensão para enviar.";
+          aviso.style.cssText = `
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #25D366;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-family: sans-serif;
+            font-size: 14px;
+            z-index: 99999;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+          `;
+          document.body.appendChild(aviso);
+          setTimeout(() => aviso.remove(), 4000);
+        }
+      });
+    });
   });
 });
 
-// Essa função roda DENTRO da página (não tem acesso ao Chrome)
 function capturarDadosDaPagina() {
   const textoSelecionado = window.getSelection().toString().trim();
   const linkAtual = window.location.href;
 
-  // Tenta achar imagem próxima do texto selecionado
   const selection = window.getSelection();
   let imagemUrl = null;
 
