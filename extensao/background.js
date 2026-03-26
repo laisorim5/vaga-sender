@@ -22,34 +22,20 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     func: capturarDadosDaPagina,
   }, (results) => {
     const dados = results[0].result;
-    dados.destino = destino;
 
-    // Salva no storage e abre o popup via notificação na aba
-    chrome.storage.local.set({ vagaPendente: dados }, () => {
-      // Injeta um aviso visual na página pra você clicar no ícone
-      chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        func: () => {
-          const aviso = document.createElement("div");
-          aviso.id = "vaga-sender-aviso";
-          aviso.innerText = "✅ Vaga capturada! Clique no ícone da extensão para enviar.";
-          aviso.style.cssText = `
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            background: #25D366;
-            color: white;
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-family: sans-serif;
-            font-size: 14px;
-            z-index: 99999;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-          `;
-          document.body.appendChild(aviso);
-          setTimeout(() => aviso.remove(), 4000);
-        }
-      });
+    // Passa os dados direto na URL do popup
+    const params = new URLSearchParams({
+      texto: dados.texto || "",
+      link: dados.link || "",
+      imagemUrl: dados.imagemUrl || "",
+      destino: destino
+    });
+
+    chrome.windows.create({
+      url: chrome.runtime.getURL(`popup.html?${params.toString()}`),
+      type: "popup",
+      width: 370,
+      height: 500
     });
   });
 });

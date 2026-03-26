@@ -104,68 +104,6 @@
 
   <div id="status"></div>
 
-  <script>
-    // Quando o popup abre, carrega os dados capturados pelo background.js
-    chrome.storage.local.get("vagaPendente", (result) => {
-      const vaga = result.vagaPendente;
-      if (!vaga) {
-        // Popup aberto sem seleção — campos ficam vazios e editáveis
-        document.getElementById("link").value = "";
-        document.getElementById("status").innerText = "✏️ Preencha os campos manualmente";
-        return;
-    }
-
-      document.getElementById("texto").value = vaga.texto || "";
-      document.getElementById("link").value = vaga.link || "";
-
-      // Só mostra a imagem se tiver uma
-      if (vaga.imagemUrl) {
-        const preview = document.getElementById("preview");
-        preview.src = vaga.imagemUrl;
-        preview.style.display = "block";
-      }
-    });
-
-    // Captura Ctrl+V com imagem
-    document.addEventListener("paste", (e) => {
-    const items = e.clipboardData.items;
-    for (const item of items) {
-        if (item.type.startsWith("image/")) {
-        const blob = item.getAsFile();
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-            const preview = document.getElementById("preview");
-            preview.src = ev.target.result; // base64
-            preview.style.display = "block";
-            document.getElementById("imagem-area").innerText = "✅ Imagem colada!";
-        };
-        reader.readAsDataURL(blob);
-        }
-    }
-    });
-
-    function enviar(destino) {
-      const texto = document.getElementById("texto").value;
-      const link = document.getElementById("link").value;
-      const imagemUrl = document.getElementById("preview").src;
-
-      document.getElementById("status").innerText = "Enviando...";
-
-      fetch("http://localhost:5000/enviar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ texto, link, imagemUrl, destino })
-      })
-      .then(r => r.json())
-      .then(() => {
-        document.getElementById("status").innerText = "✅ Enviado!";
-        // Limpa o storage depois de enviar
-        chrome.storage.local.remove("vagaPendente");
-      })
-      .catch(() => {
-        document.getElementById("status").innerText = "❌ Erro. Backend rodando?";
-      });
-    }
-  </script>
+  <script src="popup.js"></script>
 </body>
 </html> 
